@@ -1,0 +1,12 @@
+{
+  "name": "pgb-portaal",
+  "private": true,
+  "version": "0.0.1",
+  "packageManager": "pnpm@9.0.0",
+  "scripts": {
+    "dev:web": "pnpm --filter @pgb/web dev",
+    "dev:mobile": "pnpm --filter @pgb/mobile start",
+    "build:web": "pnpm --filter @pgb/web build",
+    "typecheck": "pnpm -r typecheck"
+  }
+}
