@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
 import Link from 'next/link';
+import DashboardTakenWidget from '@/components/dashboard/DashboardTakenWidget';
 
 export default async function DashboardPage() {
   const supabase = await createClient();
@@ -88,7 +89,7 @@ export default async function DashboardPage() {
   const aangemeldIds = new Set((mijnAanmeldingen ?? []).map((a: any) => a.planning_id));
 
   return (
-    <div className="p-4 md:p-8 max-w-4xl mx-auto">
+    <div className="p-4 md:p-8 max-w-5xl mx-auto">
       {/* Header */}
       <div className="mb-8">
         <p className="text-sm text-slate-400 font-medium mb-1">
@@ -197,48 +198,18 @@ export default async function DashboardPage() {
           )}
         </div>
 
-        {/* Taken */}
-        <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
-          <div className="flex items-center justify-between px-5 py-4 border-b border-slate-50">
-            <h2 className="font-semibold text-slate-800 text-sm">Taken vandaag</h2>
-            <Link href="/taken" className="text-xs text-indigo-600 font-medium hover:text-indigo-700">
-              Alle taken →
-            </Link>
-          </div>
-          {taken && taken.length > 0 ? (
-            <div className="divide-y divide-slate-50">
-              {taken.slice(0, 5).map((t: any) => {
-                const gedaan = t.taken_afvinkingen?.some((a: any) => a.datum === today);
-                return (
-                  <div key={t.id} className="flex items-center gap-3 px-5 py-3.5">
-                    <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 ${gedaan ? 'bg-emerald-500 border-emerald-500' : 'border-slate-200'}`}>
-                      {gedaan && (
-                        <svg className="w-2.5 h-2.5 text-white" fill="none" viewBox="0 0 12 12" stroke="currentColor" strokeWidth={2.5}>
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M2 6l3 3 5-5" />
-                        </svg>
-                      )}
-                    </div>
-                    <span className={`text-sm flex-1 truncate ${gedaan ? 'text-slate-400 line-through' : 'text-slate-700 font-medium'}`}>
-                      {t.titel}
-                    </span>
-                    <PrioriteitDot prioriteit={t.prioriteit} />
-                  </div>
-                );
-              })}
-              {taken.length > 5 && (
-                <div className="px-5 py-3 text-center">
-                  <Link href="/taken" className="text-xs text-slate-400 hover:text-indigo-600">
-                    +{taken.length - 5} meer taken
-                  </Link>
-                </div>
-              )}
-            </div>
-          ) : (
-            <div className="px-5 py-10 text-center">
-              <p className="text-sm text-slate-400">Geen actieve taken</p>
-            </div>
-          )}
-        </div>
+        {/* Taken — interactief widget */}
+        <DashboardTakenWidget
+          taken={(taken ?? []).map((t: any) => ({
+            id: t.id,
+            titel: t.titel,
+            prioriteit: t.prioriteit,
+            status: t.status,
+            gedaanVandaag: t.taken_afvinkingen?.some((a: any) => a.datum === today) ?? false,
+          }))}
+          vandaag={today}
+          userId={user!.id}
+        />
 
         {/* Open diensten voor zorgverlener */}
         {!isBeheerder && openCount > 0 && (

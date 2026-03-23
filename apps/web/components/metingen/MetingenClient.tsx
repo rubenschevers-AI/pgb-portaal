@@ -82,9 +82,15 @@ function CustomTooltip({ active, payload }: CustomTooltipProps) {
 export default function MetingenClient({
   metingen: initieleMetingen,
   userId,
+  ownerId,
+  isBeheerder = true,
+  eigenNaam = null,
 }: {
   metingen: Meting[];
   userId: string;
+  ownerId: string;
+  isBeheerder?: boolean;
+  eigenNaam?: string | null;
 }) {
   const supabase = createClient();
   const [mounted, setMounted] = useState(false);
@@ -104,7 +110,7 @@ export default function MetingenClient({
   const [formEenheid, setFormEenheid] = useState(MEETTYPEN[0].eenheid);
   const [formDatum, setFormDatum] = useState(now.date);
   const [formTijdstip, setFormTijdstip] = useState(now.time);
-  const [formGemetenDoor, setFormGemetenDoor] = useState('');
+  const [formGemetenDoor, setFormGemetenDoor] = useState(eigenNaam ?? '');
   const [formNotities, setFormNotities] = useState('');
 
   const activeMeettype = MEETTYPEN.find((m) => m.type === formType) ?? MEETTYPEN[0];
@@ -125,14 +131,14 @@ export default function MetingenClient({
     const { data, error } = await supabase
       .from('metingen')
       .insert({
-        owner_id: userId,
+        owner_id: ownerId,
         type: formType,
         waarde: formWaarde.trim(),
         eenheid: formEenheid.trim(),
         datum: formDatum,
         tijdstip: formTijdstip || null,
         notities: formNotities.trim() || null,
-        gemeten_door_naam: formGemetenDoor.trim() || null,
+        gemeten_door_naam: (!isBeheerder && eigenNaam) ? eigenNaam : (formGemetenDoor.trim() || null),
       })
       .select('id, type, waarde, eenheid, datum, tijdstip, notities, gemeten_door_naam, created_at')
       .single();
@@ -151,7 +157,7 @@ export default function MetingenClient({
 
     setFormWaarde('');
     setFormNotities('');
-    setFormGemetenDoor('');
+    setFormGemetenDoor(eigenNaam ?? '');
     const nowReset = getNow();
     setFormDatum(nowReset.date);
     setFormTijdstip(nowReset.time);
@@ -254,13 +260,22 @@ export default function MetingenClient({
               {/* Gemeten door */}
               <div>
                 <label className="block text-xs font-medium text-slate-500 mb-1.5">Gemeten door</label>
-                <input
-                  type="text"
-                  value={formGemetenDoor}
-                  onChange={(e) => setFormGemetenDoor(e.target.value)}
-                  placeholder="Naam zorgverlener"
-                  className="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-300 focus:border-indigo-400"
-                />
+                {!isBeheerder && eigenNaam ? (
+                  <div className="flex items-center gap-2 px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl">
+                    <div className="w-5 h-5 rounded-full bg-indigo-100 flex items-center justify-center text-[10px] font-bold text-indigo-700 shrink-0">
+                      {eigenNaam[0].toUpperCase()}
+                    </div>
+                    <span className="text-sm text-slate-700 font-medium">{eigenNaam}</span>
+                  </div>
+                ) : (
+                  <input
+                    type="text"
+                    value={formGemetenDoor}
+                    onChange={(e) => setFormGemetenDoor(e.target.value)}
+                    placeholder="Naam zorgverlener"
+                    className="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-300 focus:border-indigo-400"
+                  />
+                )}
               </div>
 
               {/* Datum */}
