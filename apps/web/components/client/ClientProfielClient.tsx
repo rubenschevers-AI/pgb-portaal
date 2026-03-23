@@ -135,7 +135,7 @@ export default function ClientProfielClient({ profiel: initProfiel, userId, owne
   if (editing && isBeheerder) {
     return (
       <div className="flex-1 overflow-y-auto px-4 md:px-8 py-6">
-        <div className="max-w-4xl mx-auto space-y-5">
+        <div className="max-w-5xl mx-auto space-y-5">
           <div className="flex items-center justify-between mb-2">
             <h2 className="text-lg font-bold text-slate-900">Clientprofiel bewerken</h2>
             <button
@@ -230,7 +230,7 @@ export default function ClientProfielClient({ profiel: initProfiel, userId, owne
   /* ── View mode ── */
   return (
     <div className="flex-1 overflow-y-auto px-4 md:px-8 py-6">
-      <div className="max-w-4xl mx-auto">
+      <div className="max-w-5xl mx-auto">
         {/* Header card */}
         <div className="bg-white border border-slate-100 rounded-2xl p-6 mb-5 flex items-start gap-5">
           {profiel!.foto_url ? (

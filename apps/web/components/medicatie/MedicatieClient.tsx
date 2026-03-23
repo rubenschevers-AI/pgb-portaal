@@ -253,7 +253,7 @@ export default function MedicatieClient({
   }).length;
 
   return (
-    <div className="p-4 md:p-8 max-w-4xl mx-auto">
+    <div className="p-4 md:p-8 max-w-5xl mx-auto">
 
       {/* ── Header ─────────────────────────────────────────── */}
       <div className="flex items-start justify-between mb-6 gap-3 flex-wrap">

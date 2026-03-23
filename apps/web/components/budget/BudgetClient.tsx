@@ -127,7 +127,7 @@ export default function BudgetClient({ budget, teamleden, recentUren, totaalVerb
   const verbruiktPct = budget && budget.totaal_budget > 0 ? Math.min(100, (totaalVerbruikt / budget.totaal_budget) * 100) : 0;
 
   return (
-    <div className="p-4 md:p-8 max-w-4xl mx-auto">
+    <div className="p-4 md:p-8 max-w-5xl mx-auto">
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-2xl md:text-3xl font-bold text-slate-900">Budget</h1>

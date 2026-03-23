@@ -95,7 +95,7 @@ export default function TeamClient({ leden, userId }: { leden: Lid[]; userId: st
   const inactief = leden.filter(l => l.status !== 'actief');
 
   return (
-    <div className="p-4 md:p-8 max-w-4xl mx-auto">
+    <div className="p-4 md:p-8 max-w-5xl mx-auto">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>

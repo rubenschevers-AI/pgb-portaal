@@ -162,7 +162,7 @@ export default function OpenDienstenClient({
 
   return (
     <div className="flex-1 overflow-y-auto px-4 md:px-8 py-6">
-      <div className="max-w-4xl mx-auto space-y-4">
+      <div className="max-w-5xl mx-auto space-y-4">
         <p className="text-xs text-slate-400">
           {diensten.length} open {diensten.length === 1 ? 'dienst' : 'diensten'} beschikbaar
           {!isBeheerder && ' — meld je aan voor diensten die je kunt werken'}

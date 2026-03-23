@@ -173,7 +173,7 @@ export default function TakenClient({
   const progressPct = aantalActief > 0 ? Math.round((aantalVandaag / aantalActief) * 100) : 0;
 
   return (
-    <div className="p-4 md:p-8 max-w-4xl mx-auto">
+    <div className="p-4 md:p-8 max-w-5xl mx-auto">
       {/* Header */}
       <div className="flex items-start justify-between mb-6 gap-3 flex-wrap">
         <div>
