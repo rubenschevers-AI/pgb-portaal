@@ -2,12 +2,6 @@ import { createClient } from '@/lib/supabase/server';
 import OpenDienstenClient from '@/components/open-diensten/OpenDienstenClient';
 import SectionTabs from '@/components/layout/SectionTabs';
 
-const TABS = [
-  { href: '/planning', label: 'Planning' },
-  { href: '/basisrooster', label: 'Basisrooster' },
-  { href: '/open-diensten', label: 'Open diensten' },
-];
-
 export default async function OpenDienstenPage() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -15,6 +9,17 @@ export default async function OpenDienstenPage() {
   const { data: ownerIdData } = await supabase.rpc('my_owner_id');
   const ownerId = (ownerIdData as string) ?? user!.id;
   const isBeheerder = ownerId === user!.id;
+
+  const TABS = isBeheerder
+    ? [
+        { href: '/planning',      label: 'Planning' },
+        { href: '/basisrooster',  label: 'Basisrooster' },
+        { href: '/open-diensten', label: 'Open diensten' },
+      ]
+    : [
+        { href: '/planning',      label: 'Mijn diensten' },
+        { href: '/open-diensten', label: 'Open diensten' },
+      ];
 
   // Fetch open shifts
   const { data: openDiensten } = await supabase

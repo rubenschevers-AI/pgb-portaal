@@ -59,12 +59,16 @@ export default function PlanningClient({
   diensten: initDiensten,
   team,
   userId,
+  ownerId,
   basisrooster,
+  isBeheerder = true,
 }: {
   diensten: Dienst[];
   team: TeamLid[];
   userId: string;
+  ownerId: string;
   basisrooster: BasisroosterSlot[];
+  isBeheerder?: boolean;
 }) {
   const [diensten, setDiensten] = useState<Dienst[]>(initDiensten);
   const [view, setView] = useState<'week' | 'month'>('week');
@@ -163,7 +167,7 @@ export default function PlanningClient({
         team_member_id: teamMemberId || null,
         notities: notities || null,
         status,
-        owner_id: userId,
+        owner_id: ownerId,
       })
       .select('*, team_members(id, naam, rol)')
       .single();
@@ -238,7 +242,7 @@ export default function PlanningClient({
           team_member_id: slot.team_member_id || null,
           notities: slot.notities || null,
           status,
-          owner_id: userId,
+          owner_id: ownerId,
         })
         .select('*, team_members(id, naam, rol)')
         .single();
@@ -287,7 +291,7 @@ export default function PlanningClient({
           <button onClick={handleVandaag} className="px-3 h-8 rounded-xl border border-slate-200 text-xs font-medium text-slate-600 hover:bg-slate-50 transition">Vandaag</button>
           <button onClick={handleVolgende} className="w-8 h-8 rounded-xl border border-slate-200 flex items-center justify-center text-slate-500 hover:bg-slate-50 transition">›</button>
 
-          {basisrooster.length > 0 && (
+          {isBeheerder && basisrooster.length > 0 && (
             <button
               onClick={() => setRoosterToepassen(!roosterToepassen)}
               className="ml-1 px-3 h-8 rounded-xl border border-indigo-200 bg-indigo-50 text-xs font-semibold text-indigo-700 hover:bg-indigo-100 transition hidden md:inline-flex items-center"
@@ -295,12 +299,14 @@ export default function PlanningClient({
               Basisrooster toepassen
             </button>
           )}
-          <button
-            onClick={() => { setShowForm(!showForm); setSelectedDatum(vandaag); setTeamMemberId(''); }}
-            className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-4 h-8 rounded-xl text-xs transition"
-          >
-            + Dienst
-          </button>
+          {isBeheerder && (
+            <button
+              onClick={() => { setShowForm(!showForm); setSelectedDatum(vandaag); setTeamMemberId(''); }}
+              className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-4 h-8 rounded-xl text-xs transition"
+            >
+              + Dienst
+            </button>
+          )}
         </div>
       </div>
 

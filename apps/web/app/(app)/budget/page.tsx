@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
 import BudgetClient from '@/components/budget/BudgetClient';
 import SectionTabs from '@/components/layout/SectionTabs';
+import { redirect } from 'next/navigation';
 
 const TABS = [
   { href: '/uren', label: 'Uren' },
@@ -10,6 +11,9 @@ const TABS = [
 export default async function BudgetPage() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
+  const { data: ownerIdData } = await supabase.rpc('my_owner_id');
+  const ownerId = (ownerIdData as string) ?? user!.id;
+  if (ownerId !== user!.id) redirect('/uren');
   const userId = user!.id;
 
   const [

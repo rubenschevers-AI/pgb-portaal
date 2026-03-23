@@ -8,7 +8,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect('/login');
 
-  const [{ data: profiel }, { data: devAccounts }] = await Promise.all([
+  const [{ data: profiel }, { data: devAccounts }, { data: ownerIdData }] = await Promise.all([
     supabase
       .from('profiles')
       .select('voornaam, achternaam')
@@ -18,15 +18,19 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       .from('dev_test_accounts')
       .select('id, label, email, rol')
       .order('rol'),
+    supabase.rpc('my_owner_id'),
   ]);
 
   const displayNaam = profiel?.voornaam
     ? `${profiel.voornaam}${profiel.achternaam ? ' ' + profiel.achternaam : ''}`
     : null;
 
+  const ownerId = (ownerIdData as string) ?? user.id;
+  const isBeheerder = ownerId === user.id;
+
   return (
     <div className="flex h-screen bg-slate-50 overflow-hidden">
-      <Sidebar user={user} displayNaam={displayNaam} />
+      <Sidebar user={user} displayNaam={displayNaam} isBeheerder={isBeheerder} />
       <main className="flex-1 overflow-y-auto pb-16 md:pb-0">
         {children}
       </main>

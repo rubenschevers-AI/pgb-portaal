@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
 import BasisroosterClient from '@/components/basisrooster/BasisroosterClient';
 import SectionTabs from '@/components/layout/SectionTabs';
+import { redirect } from 'next/navigation';
 
 const TABS = [
   { href: '/planning', label: 'Planning' },
@@ -11,6 +12,9 @@ const TABS = [
 export default async function BasisroosterPage() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
+  const { data: ownerIdData } = await supabase.rpc('my_owner_id');
+  const ownerId = (ownerIdData as string) ?? user!.id;
+  if (ownerId !== user!.id) redirect('/open-diensten');
 
   const [
     { data: roosterSlots },

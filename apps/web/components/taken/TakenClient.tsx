@@ -34,11 +34,13 @@ export default function TakenClient({
   team,
   userId,
   vandaag,
+  isBeheerder = true,
 }: {
   taken: Taak[];
   team: TeamLid[];
   userId: string;
   vandaag: string;
+  isBeheerder?: boolean;
 }) {
   const [showForm, setShowForm] = useState(false);
   const [filter, setFilter] = useState<'actief' | 'alles'>('actief');
@@ -195,12 +197,14 @@ export default function TakenClient({
               Alles
             </button>
           </div>
-          <button
-            onClick={() => setShowForm(!showForm)}
-            className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-4 py-2 rounded-xl text-sm transition"
-          >
-            + Taak
-          </button>
+          {isBeheerder && (
+            <button
+              onClick={() => setShowForm(!showForm)}
+              className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-4 py-2 rounded-xl text-sm transition"
+            >
+              + Taak
+            </button>
+          )}
         </div>
       </div>
 
@@ -344,21 +348,23 @@ export default function TakenClient({
                           </div>
                         </div>
 
-                        {/* Acties */}
-                        <div className="flex items-center gap-1 shrink-0">
-                          <button
-                            onClick={() => handleStatusToggle(taak)}
-                            className="text-xs text-slate-400 hover:text-slate-600 px-2 py-1 rounded-lg hover:bg-slate-100 transition"
-                          >
-                            {taak.status === 'actief' ? 'Pauzeer' : 'Activeer'}
-                          </button>
-                          <button
-                            onClick={() => handleVerwijder(taak.id)}
-                            className="text-xs text-red-400 hover:text-red-600 px-2 py-1 rounded-lg hover:bg-red-50 transition"
-                          >
-                            ×
-                          </button>
-                        </div>
+                        {/* Acties — alleen voor beheerder */}
+                        {isBeheerder && (
+                          <div className="flex items-center gap-1 shrink-0">
+                            <button
+                              onClick={() => handleStatusToggle(taak)}
+                              className="text-xs text-slate-400 hover:text-slate-600 px-2 py-1 rounded-lg hover:bg-slate-100 transition"
+                            >
+                              {taak.status === 'actief' ? 'Pauzeer' : 'Activeer'}
+                            </button>
+                            <button
+                              onClick={() => handleVerwijder(taak.id)}
+                              className="text-xs text-red-400 hover:text-red-600 px-2 py-1 rounded-lg hover:bg-red-50 transition"
+                            >
+                              ×
+                            </button>
+                          </div>
+                        )}
                       </div>
                     );
                   })}

@@ -14,40 +14,43 @@ type NavGroup = {
   routes: string[];
 };
 
-const NAV: NavGroup[] = [
-  { href: '/dashboard',   label: 'Dashboard',  icon: IconDashboard, routes: ['/dashboard'] },
-  { href: '/planning',    label: 'Rooster',    icon: IconPlanning,  routes: ['/planning', '/basisrooster', '/open-diensten'] },
-  { href: '/taken',       label: 'Taken',      icon: IconTaken,     routes: ['/taken'] },
-  { href: '/metingen',    label: 'Gezondheid', icon: IconMetingen,  routes: ['/metingen', '/medicatie'] },
-  { href: '/chat',        label: 'Chat',       icon: IconChat,      routes: ['/chat'] },
-  { href: '/uren',        label: 'Financiën',  icon: IconBudget,    routes: ['/uren', '/budget'] },
-  { href: '/team',        label: 'Team',       icon: IconTeam,      routes: ['/team', '/client'] },
+const NAV_BEHEERDER: NavGroup[] = [
+  { href: '/dashboard',     label: 'Dashboard',  icon: IconDashboard, routes: ['/dashboard'] },
+  { href: '/planning',      label: 'Rooster',    icon: IconPlanning,  routes: ['/planning', '/basisrooster', '/open-diensten'] },
+  { href: '/taken',         label: 'Taken',      icon: IconTaken,     routes: ['/taken'] },
+  { href: '/metingen',      label: 'Gezondheid', icon: IconMetingen,  routes: ['/metingen', '/medicatie'] },
+  { href: '/chat',          label: 'Chat',       icon: IconChat,      routes: ['/chat'] },
+  { href: '/uren',          label: 'Financiën',  icon: IconBudget,    routes: ['/uren', '/budget'] },
+  { href: '/team',          label: 'Team',       icon: IconTeam,      routes: ['/team', '/client'] },
 ];
 
-// First 4 items + Chat in mobile bottom nav, rest in "Meer"
-const MOBILE_MAIN: NavGroup[] = [
-  NAV[0], // Dashboard
-  NAV[1], // Rooster
-  NAV[2], // Taken
-  NAV[4], // Chat
-];
-const MOBILE_MEER: NavGroup[] = [
-  NAV[3], // Gezondheid
-  NAV[5], // Financiën
-  NAV[6], // Team
+const NAV_ZORGVERLENER: NavGroup[] = [
+  { href: '/dashboard',     label: 'Dashboard',  icon: IconDashboard, routes: ['/dashboard'] },
+  { href: '/open-diensten', label: 'Rooster',    icon: IconPlanning,  routes: ['/planning', '/open-diensten'] },
+  { href: '/taken',         label: 'Taken',      icon: IconTaken,     routes: ['/taken'] },
+  { href: '/metingen',      label: 'Gezondheid', icon: IconMetingen,  routes: ['/metingen', '/medicatie'] },
+  { href: '/chat',          label: 'Chat',       icon: IconChat,      routes: ['/chat'] },
+  { href: '/uren',          label: 'Uren',       icon: IconBudget,    routes: ['/uren'] },
+  { href: '/client',        label: 'Cliënt',     icon: IconTeam,      routes: ['/client'] },
 ];
 
 export default function Sidebar({
   user,
   displayNaam,
+  isBeheerder = true,
 }: {
   user: User;
   displayNaam?: string | null;
+  isBeheerder?: boolean;
 }) {
   const pathname = usePathname();
   const router = useRouter();
   const supabase = createClient();
   const [meerOpen, setMeerOpen] = useState(false);
+
+  const NAV = isBeheerder ? NAV_BEHEERDER : NAV_ZORGVERLENER;
+  const MOBILE_MAIN = NAV.slice(0, 4);
+  const MOBILE_MEER = NAV.slice(4);
 
   const isActive = (group: NavGroup) =>
     group.routes.some((r) => pathname.startsWith(r));

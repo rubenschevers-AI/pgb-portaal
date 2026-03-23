@@ -48,10 +48,16 @@ export default function UrenClient({
   uren: initUren,
   team,
   userId,
+  ownerId,
+  isBeheerder = true,
+  mijnTeamLidId = null,
 }: {
   uren: UrenEntry[];
   team: TeamLid[];
   userId: string;
+  ownerId: string;
+  isBeheerder?: boolean;
+  mijnTeamLidId?: string | null;
 }) {
   const supabase = createClient();
   const [uren, setUren] = useState<UrenEntry[]>(initUren);
@@ -82,18 +88,19 @@ export default function UrenClient({
     setLoading(true);
     setFout(null);
 
+    const teamLidId = isBeheerder ? formLid : (mijnTeamLidId ?? formLid);
     const { data, error } = await supabase
       .from('uren_registratie')
       .insert({
-        owner_id: userId,
-        team_member_id: formLid,
+        owner_id: ownerId,
+        team_member_id: teamLidId,
         ingediend_door: userId,
         datum: formDatum,
         start_tijd: formStart,
         eind_tijd: formEind,
         pauze_minuten: parseInt(formPauze) || 0,
         omschrijving: formOmschrijving.trim() || null,
-        status: 'goedgekeurd', // Direct goedkeuren als budgethouder voegt toe
+        status: isBeheerder ? 'goedgekeurd' : 'ingediend',
       })
       .select('id, datum, start_tijd, eind_tijd, pauze_minuten, omschrijving, status, team_member_id, team_members(naam, rol)')
       .single();
@@ -149,30 +156,42 @@ export default function UrenClient({
       <div className="flex items-start justify-between mb-6 gap-3 flex-wrap">
         <div>
           <h1 className="text-xl md:text-2xl font-bold text-slate-900">Uren</h1>
-          <p className="text-sm text-slate-400 mt-0.5">Registreer en keur uren goed</p>
+          <p className="text-sm text-slate-400 mt-0.5">
+            {isBeheerder ? 'Registreer en keur uren goed' : 'Dien je gewerkte uren in'}
+          </p>
         </div>
         <button
           onClick={() => setShowForm(!showForm)}
           className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-4 py-2 rounded-xl text-sm transition"
         >
-          + Uren toevoegen
+          + Uren indienen
         </button>
       </div>
 
       {/* Samenvatting */}
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-6">
-        <div className="bg-white border border-slate-100 rounded-2xl p-4">
-          <p className="text-xs text-slate-400 font-medium mb-1">Te goedkeuren</p>
-          <p className="text-2xl font-bold text-amber-600">{pendenteCount}</p>
-        </div>
+      <div className={`grid gap-3 mb-6 ${isBeheerder ? 'grid-cols-2 md:grid-cols-3' : 'grid-cols-2'}`}>
+        {isBeheerder && (
+          <div className="bg-white border border-slate-100 rounded-2xl p-4">
+            <p className="text-xs text-slate-400 font-medium mb-1">Te goedkeuren</p>
+            <p className="text-2xl font-bold text-amber-600">{pendenteCount}</p>
+          </div>
+        )}
         <div className="bg-white border border-slate-100 rounded-2xl p-4">
           <p className="text-xs text-slate-400 font-medium mb-1">Goedgekeurde uren</p>
           <p className="text-2xl font-bold text-slate-900">{totaalUren.toFixed(1)}u</p>
         </div>
-        <div className="bg-white border border-slate-100 rounded-2xl p-4 col-span-2 md:col-span-1">
-          <p className="text-xs text-slate-400 font-medium mb-1">Totaal kosten</p>
-          <p className="text-2xl font-bold text-emerald-700">{formatEuro(totaalBedrag)}</p>
-        </div>
+        {isBeheerder && (
+          <div className="bg-white border border-slate-100 rounded-2xl p-4 col-span-2 md:col-span-1">
+            <p className="text-xs text-slate-400 font-medium mb-1">Totaal kosten</p>
+            <p className="text-2xl font-bold text-emerald-700">{formatEuro(totaalBedrag)}</p>
+          </div>
+        )}
+        {!isBeheerder && (
+          <div className="bg-white border border-slate-100 rounded-2xl p-4">
+            <p className="text-xs text-slate-400 font-medium mb-1">Ingediend</p>
+            <p className="text-2xl font-bold text-amber-600">{pendenteCount}</p>
+          </div>
+        )}
       </div>
 
       {/* Formulier */}
@@ -181,18 +200,20 @@ export default function UrenClient({
           <h2 className="font-semibold text-slate-800 mb-4 text-sm">Uren registreren</h2>
           <form onSubmit={handleToevoegen} className="space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-xs font-medium text-slate-600 mb-1">Zorgverlener *</label>
-                <select
-                  value={formLid}
-                  onChange={e => setFormLid(e.target.value)}
-                  required
-                  className="w-full px-3 py-2.5 border border-slate-200 rounded-xl text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                >
-                  <option value="">— Kies zorgverlener —</option>
-                  {team.map(l => <option key={l.id} value={l.id}>{l.naam}</option>)}
-                </select>
-              </div>
+              {isBeheerder && (
+                <div>
+                  <label className="block text-xs font-medium text-slate-600 mb-1">Zorgverlener *</label>
+                  <select
+                    value={formLid}
+                    onChange={e => setFormLid(e.target.value)}
+                    required
+                    className="w-full px-3 py-2.5 border border-slate-200 rounded-xl text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  >
+                    <option value="">— Kies zorgverlener —</option>
+                    {team.map(l => <option key={l.id} value={l.id}>{l.naam}</option>)}
+                  </select>
+                </div>
+              )}
               <div>
                 <label className="block text-xs font-medium text-slate-600 mb-1">Datum *</label>
                 <input
@@ -248,7 +269,7 @@ export default function UrenClient({
             <div className="flex gap-2">
               <button type="submit" disabled={loading}
                 className="bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white font-semibold px-4 py-2 rounded-xl text-sm transition">
-                {loading ? 'Opslaan...' : 'Opslaan (goedgekeurd)'}
+                {loading ? 'Opslaan...' : isBeheerder ? 'Opslaan (goedgekeurd)' : 'Indienen'}
               </button>
               <button type="button" onClick={() => setShowForm(false)}
                 className="px-4 py-2 rounded-xl text-sm text-slate-500 hover:bg-slate-50 transition">
@@ -332,8 +353,8 @@ export default function UrenClient({
                     </div>
                   </div>
 
-                  {/* Actie-knoppen voor ingediende uren */}
-                  {entry.status === 'ingediend' && (
+                  {/* Actie-knoppen voor ingediende uren — alleen beheerder */}
+                  {isBeheerder && entry.status === 'ingediend' && (
                     <div className="flex gap-2 mt-3 ml-14">
                       <button
                         onClick={() => handleGoedkeuren(entry.id)}
