@@ -1,31 +1,24 @@
 'use client';
 
 import { useState } from 'react';
-import { createClient } from '@/lib/supabase/client';
-import { useRouter } from 'next/navigation';
+import { loginAction } from './actions';
 import Link from 'next/link';
 
 export default function LoginPage() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const router = useRouter();
-  const supabase = createClient();
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
     setError('');
 
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) {
-      setError('Onjuist e-mailadres of wachtwoord.');
-    } else {
-      router.push('/dashboard');
-      router.refresh();
+    const result = await loginAction(new FormData(e.currentTarget));
+    if (result?.error) {
+      setError(result.error);
+      setLoading(false);
     }
-    setLoading(false);
+    // Bij succes doet de server action redirect('/dashboard') — geen verdere actie nodig
   };
 
   return (
@@ -37,15 +30,14 @@ export default function LoginPage() {
           <p className="text-gray-500 mt-1">Inloggen bij uw zorgomgeving</p>
         </div>
 
-        <form onSubmit={handleLogin} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">E-mailadres</label>
             <input
               type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              name="email"
               required
-              className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
               placeholder="naam@voorbeeld.nl"
             />
           </div>
@@ -54,10 +46,9 @@ export default function LoginPage() {
             <label className="block text-sm font-medium text-gray-700 mb-1">Wachtwoord</label>
             <input
               type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              name="password"
               required
-              className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
               placeholder="••••••••"
             />
           </div>
